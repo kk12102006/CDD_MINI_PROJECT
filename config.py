@@ -14,5 +14,7 @@ class Config:
     UPLOAD_FOLDER = str(UPLOAD_DIR)
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024
     ALLOWED_EXTENSIONS = {".pdf"}
+    TESSERACT_CMD = os.environ.get("TESSERACT_CMD")
+    TESSERACT_LANG = os.environ.get("TESSERACT_LANG", "eng")
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"

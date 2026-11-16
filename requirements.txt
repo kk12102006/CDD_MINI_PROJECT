@@ -3,3 +3,4 @@ Werkzeug
 Flask-WTF
 PyMuPDF
 matplotlib
+Pillow

@@ -17,7 +17,11 @@ from werkzeug.utils import secure_filename
 
 from database.db_connection import get_db_connection
 from routes.auth import login_required
-from services.pdf_extractor import extract_timetable_from_pdf
+from services.pdf_extractor import (
+    TimetablePdfError,
+    TesseractUnavailableError,
+    extract_timetable_from_pdf,
+)
 
 
 timetable_bp = Blueprint("timetable", __name__)
@@ -175,9 +179,10 @@ def upload_timetable():
         flash("Only PDF files are supported for timetable uploads.", "danger")
         return redirect(url_for("timetable.timetable"))
 
-    if file.mimetype and file.mimetype != "application/pdf":
+    if file.stream.read(5) != b"%PDF-":
         flash("The uploaded file does not appear to be a valid PDF.", "danger")
         return redirect(url_for("timetable.timetable"))
+    file.stream.seek(0)
 
     upload_dir = current_app.config["UPLOAD_FOLDER"]
     os.makedirs(upload_dir, exist_ok=True)
@@ -187,9 +192,20 @@ def upload_timetable():
 
     subjects = _subject_list()
     subject_names = [subject["subject_name"] for subject in subjects]
-    preview_entries = extract_timetable_from_pdf(file_path, subject_names)
+    try:
+        preview_entries = extract_timetable_from_pdf(file_path, subject_names)
+    except TesseractUnavailableError as error:
+        flash(str(error), "danger")
+        return redirect(url_for("timetable.timetable"))
+    except TimetablePdfError as error:
+        flash(str(error), "danger")
+        return redirect(url_for("timetable.timetable"))
     if not preview_entries:
-        flash("Text could not be extracted from this PDF. Please upload a text-based PDF or use manual timetable entry.", "warning")
+        flash(
+            "No timetable entries could be recognized. Check that the PDF shows "
+            "days, class times and subjects clearly, or use manual entry.",
+            "warning",
+        )
         return redirect(url_for("timetable.timetable"))
 
     matched_entries = []
