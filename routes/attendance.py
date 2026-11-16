@@ -4,11 +4,22 @@ from flask import Blueprint, flash, redirect, render_template, request, session,
 
 from database.db_connection import get_db_connection
 from routes.auth import login_required
+from services.attendance_calculator import get_subject_attendance_overview
 
 
 attendance_bp = Blueprint("attendance", __name__)
 VALID_STATUSES = {"P", "A", "NA"}
 COMPLETED_STATUSES = {"P", "A"}
+
+
+@attendance_bp.route("/attendance/overview")
+@login_required
+def attendance_overview():
+    subjects = get_subject_attendance_overview(session["student_id"])
+    return render_template(
+        "attendance_overview.html",
+        subjects=subjects,
+    )
 
 
 def _parse_attendance_date(raw_value, default_today=True):

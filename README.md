@@ -38,6 +38,8 @@ OCR results are estimates. Review and correct every extracted entry on the previ
 
 Open **Attendance** while signed in to mark each period from your saved weekly timetable. Select a past or current date, choose Present, Absent, or No class for every period, and save. No class is stored separately and does not count toward completed attendance. The manually entered total scheduled classes remains unchanged; Present and Absent records are blocked once that total is reached. Use **Attendance history** to review and correct saved records.
 
+Choose **Attendance overview** from the Attendance menu to view subject-wise present, absent, completed and no-class counts, attendance percentage, and allowed/remaining absences. These values are recalculated from saved attendance records whenever the overview loads. Reaching the absence limit displays an absent-deadline warning; exceeding it displays an attendance-shortage warning as well.
+
 Run the automated attendance tests with:
 
 ```powershell

@@ -25,7 +25,15 @@
                         <a class="nav-link" href="{{ url_for('dashboard.dashboard') }}">Dashboard</a>
                         <a class="nav-link" href="{{ url_for('subjects.list_subjects') }}">Subjects</a>
                         <a class="nav-link" href="{{ url_for('timetable.timetable') }}">Timetable</a>
-                        <a class="nav-link" href="{{ url_for('attendance.daily_attendance') }}">Attendance</a>
+                        <div class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="attendanceNavigation"
+                               role="button" data-bs-toggle="dropdown" aria-expanded="false">Attendance</a>
+                            <ul class="dropdown-menu" aria-labelledby="attendanceNavigation">
+                                <li><a class="dropdown-item" href="{{ url_for('attendance.daily_attendance') }}">Daily attendance</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('attendance.attendance_overview') }}">Attendance overview</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('attendance.attendance_history') }}">Attendance history</a></li>
+                            </ul>
+                        </div>
                         <span class="nav-link nav-placeholder" aria-disabled="true">Reports <small>Coming soon</small></span>
                         <form action="{{ url_for('auth.logout') }}" method="post" class="d-inline">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

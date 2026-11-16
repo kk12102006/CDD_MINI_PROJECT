@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Attendance overview{% endblock %}
+{% block content %}
+<section class="dashboard-section">
+    <div class="container">
+        <div class="page-heading">
+            <div>
+                <span class="eyebrow">SUBJECT-BY-SUBJECT SUMMARY</span>
+                <h1>Attendance overview</h1>
+                <p>Current statistics are calculated from your saved P, A and NA records.</p>
+            </div>
+            <div class="attendance-overview-actions">
+                <a class="btn btn-primary" href="{{ url_for('attendance.daily_attendance') }}">Daily attendance</a>
+                <a class="btn btn-outline-primary" href="{{ url_for('attendance.attendance_history') }}">History</a>
+            </div>
+        </div>
+
+        {% if subjects %}
+            <div class="attendance-overview-grid">
+                {% for subject in subjects %}
+                    <article class="attendance-overview-card">
+                        <div class="attendance-overview-heading">
+                            <div>
+                                <span class="eyebrow">SUBJECT</span>
+                                <h2>{{ subject.subject_name }}</h2>
+                            </div>
+                            <span class="attendance-summary-status status-summary-{{ subject.attendance_status }}">
+                                {{ subject.attendance_status_label }}
+                            </span>
+                        </div>
+
+                        <div class="attendance-progress-heading">
+                            <strong>{{ subject.attendance_percentage_display }}</strong>
+                            <span>Minimum required: {{ "%g"|format(subject.minimum_percentage) }}%</span>
+                        </div>
+                        <div class="progress attendance-progress" role="progressbar"
+                             aria-label="{{ subject.subject_name }} attendance percentage"
+                             aria-valuenow="{{ subject.progress_percentage }}"
+                             aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar {% if subject.attendance_status == 'below_required' %}bg-danger{% elif subject.attendance_status == 'satisfactory' %}bg-success{% else %}bg-secondary{% endif %}"
+                                 style="width: {{ subject.progress_percentage }}%"></div>
+                        </div>
+
+                        <dl class="attendance-metrics-grid">
+                            <div><dt>Total scheduled classes</dt><dd>{{ subject.total_scheduled_classes }}</dd></div>
+                            <div><dt>Completed classes</dt><dd>{{ subject.completed_classes }}</dd></div>
+                            <div><dt>Present classes</dt><dd>{{ subject.present_classes }}</dd></div>
+                            <div><dt>Absent classes</dt><dd>{{ subject.absent_classes }}</dd></div>
+                            <div><dt>No class entries</dt><dd>{{ subject.no_class_entries }}</dd></div>
+                            <div><dt>Maximum allowed absences</dt><dd>{{ subject.maximum_allowed_absences }}</dd></div>
+                            <div><dt>Actual absences</dt><dd>{{ subject.actual_absences }}</dd></div>
+                            <div><dt>Remaining allowed absences</dt><dd>{{ subject.remaining_allowed_absences }}</dd></div>
+                        </dl>
+
+                        {% if subject.warnings %}
+                            <div class="attendance-warning-list">
+                                {% for warning in subject.warnings %}
+                                    <div class="attendance-warning warning-{{ warning.code }}">
+                                        <strong>{{ warning.title }}</strong>
+                                        <span>{{ warning.message }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="attendance-no-warning">No absence warnings.</div>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-subjects">
+                <span class="empty-subject-icon">◷</span>
+                <h2>No subjects to summarize yet.</h2>
+                <p>Add subjects first. Your attendance overview will update automatically as you mark attendance.</p>
+                <a class="btn btn-primary" href="{{ url_for('subjects.list_subjects') }}">Manage subjects</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
