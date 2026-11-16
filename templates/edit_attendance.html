@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Edit attendance{% endblock %}
+{% block content %}
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-card auth-card-compact">
+            <div class="auth-intro">
+                <span class="eyebrow">CORRECT A RECORD</span>
+                <h1>Edit attendance</h1>
+                <p>{{ record.subject_name }} · {{ record.attendance_date }} · {{ record.start_time }} – {{ record.end_time }}</p>
+                {% if record.period_number %}
+                    <p>Period {{ record.period_number }}</p>
+                {% endif %}
+            </div>
+            <form method="post" action="{{ url_for('attendance.edit_attendance', attendance_id=record.attendance_id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <fieldset class="attendance-status-options attendance-status-options-edit">
+                    <legend class="form-label">Attendance status</legend>
+                    {% for code, label in [("P", "Present"), ("A", "Absent"), ("NA", "No class")] %}
+                        <input class="attendance-status-input" type="radio" id="edit-status-{{ code|lower }}"
+                               name="status" value="{{ code }}" {% if record.status == code %}checked{% endif %} required>
+                        <label class="attendance-status-option status-{{ code|lower }}"
+                               for="edit-status-{{ code|lower }}">{{ label }}</label>
+                    {% endfor %}
+                </fieldset>
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a class="btn btn-outline-secondary"
+                       href="{{ url_for('attendance.attendance_history', date=record.attendance_date) }}">Cancel</a>
+                    <button class="btn btn-primary" type="submit">Save correction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

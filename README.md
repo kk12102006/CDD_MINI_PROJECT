@@ -1,6 +1,6 @@
 # Student Attendance Manager
 
-A browser-based Flask application for student accounts, a private dashboard, and student-specific subject management. Subjects can be registered, edited, and deleted by their owner; scheduled class totals are entered manually.
+A browser-based Flask application for student accounts, a private dashboard, subject management, weekly timetable management, and daily attendance. Subjects can be registered, edited, and deleted by their owner; scheduled class totals are entered manually.
 
 ## Requirements
 
@@ -33,5 +33,15 @@ python app.py
 The default OCR language is English; set `TESSERACT_LANG` to a language code installed with Tesseract if needed.
 
 OCR results are estimates. Review and correct every extracted entry on the preview page before saving. Complex timetable layouts, low-resolution scans, and handwriting may not be recognized accurately.
+
+### Daily attendance
+
+Open **Attendance** while signed in to mark each period from your saved weekly timetable. Select a past or current date, choose Present, Absent, or No class for every period, and save. No class is stored separately and does not count toward completed attendance. The manually entered total scheduled classes remains unchanged; Present and Absent records are blocked once that total is reached. Use **Attendance history** to review and correct saved records.
+
+Run the automated attendance tests with:
+
+```powershell
+python -m unittest discover -s tests -v
+```
 
 Set a stable secret key in your environment before deployment. For example, generate one with `python -c "import secrets; print(secrets.token_hex(32))"` and set the `SECRET_KEY` environment variable. If not set, the app generates a key for the current process, so active sessions will be invalidated when the app restarts.

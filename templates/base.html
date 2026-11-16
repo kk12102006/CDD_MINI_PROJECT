@@ -25,7 +25,7 @@
                         <a class="nav-link" href="{{ url_for('dashboard.dashboard') }}">Dashboard</a>
                         <a class="nav-link" href="{{ url_for('subjects.list_subjects') }}">Subjects</a>
                         <a class="nav-link" href="{{ url_for('timetable.timetable') }}">Timetable</a>
-                        <span class="nav-link nav-placeholder" aria-disabled="true">Attendance <small>Coming soon</small></span>
+                        <a class="nav-link" href="{{ url_for('attendance.daily_attendance') }}">Attendance</a>
                         <span class="nav-link nav-placeholder" aria-disabled="true">Reports <small>Coming soon</small></span>
                         <form action="{{ url_for('auth.logout') }}" method="post" class="d-inline">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

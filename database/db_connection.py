@@ -81,6 +81,42 @@ def init_db(database_path: str) -> None:
             ON timetable_entries (student_id, day_of_week, start_time)
             """
         )
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_timetable_student_entry
+            ON timetable_entries (student_id, timetable_id)
+            """
+        )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS attendance_records (
+                attendance_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id INTEGER NOT NULL,
+                timetable_id INTEGER NOT NULL,
+                attendance_date TEXT NOT NULL
+                    CHECK (
+                        length(attendance_date) = 10
+                        AND date(attendance_date) IS NOT NULL
+                        AND date(attendance_date) = attendance_date
+                    ),
+                status TEXT NOT NULL CHECK (status IN ('P', 'A', 'NA')),
+                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE (timetable_id, attendance_date),
+                FOREIGN KEY (student_id) REFERENCES students(student_id)
+                    ON DELETE CASCADE,
+                FOREIGN KEY (student_id, timetable_id)
+                    REFERENCES timetable_entries(student_id, timetable_id)
+                    ON DELETE CASCADE
+            )
+            """
+        )
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_attendance_student_date
+            ON attendance_records (student_id, attendance_date DESC)
+            """
+        )
         connection.commit()
     finally:
         connection.close()

@@ -6,6 +6,7 @@ from flask_wtf.csrf import CSRFProtect
 from config import Config
 from database.db_connection import init_db
 from routes.auth import auth_bp
+from routes.attendance import attendance_bp
 from routes.dashboard import dashboard_bp
 from routes.subjects import subjects_bp
 from routes.timetable import timetable_bp
@@ -17,6 +18,7 @@ def create_app(config_object=Config):
     CSRFProtect(app)
     init_db(app.config["DATABASE"])
     app.register_blueprint(auth_bp)
+    app.register_blueprint(attendance_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(subjects_bp)
     app.register_blueprint(timetable_bp)
