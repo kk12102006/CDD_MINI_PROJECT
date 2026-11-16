@@ -4,3 +4,5 @@ Flask-WTF
 PyMuPDF
 matplotlib
 Pillow
+reportlab
+openpyxl

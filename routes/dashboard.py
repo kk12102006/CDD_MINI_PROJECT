@@ -2,6 +2,8 @@ from flask import Blueprint, flash, redirect, render_template, session, url_for
 
 from database.db_connection import get_db_connection
 from routes.auth import login_required
+from services.report_service import get_overall_summary
+from services.attendance_calculator import get_subject_attendance_overview
 
 
 dashboard_bp = Blueprint("dashboard", __name__)
@@ -42,9 +44,13 @@ def dashboard():
             (session["student_id"],),
         ).fetchall()
 
+    attendance_summary = get_overall_summary(
+        get_subject_attendance_overview(session["student_id"])
+    )
     return render_template(
         "dashboard.html",
         student=student,
         subject_count=subject_count,
         recent_subjects=recent_subjects,
+        attendance_summary=attendance_summary,
     )

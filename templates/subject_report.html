@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}{{ subject.subject_name }} report{% endblock %}
+{% block content %}
+<section class="report-section">
+    <div class="container">
+        <div class="page-heading">
+            <div>
+                <span class="eyebrow">SUBJECT REPORT</span>
+                <h1>{{ subject.subject_name }}</h1>
+                <p>Progress, attendance history and allowed absences.</p>
+            </div>
+            <div class="report-actions">
+                <a class="btn btn-outline-primary" href="{{ url_for('reports.download_subject_pdf_report', subject_id=subject.subject_id) }}">Download PDF</a>
+                <a class="btn btn-primary" href="{{ url_for('reports.download_subject_excel_report', subject_id=subject.subject_id) }}">Download Excel</a>
+                <a class="btn btn-outline-secondary" href="{{ url_for('reports.reports_index') }}">All reports</a>
+            </div>
+        </div>
+
+        {% if subject.warnings %}
+            <div class="report-alert alert alert-warning" role="status">
+                {% for warning in subject.warnings %}
+                    <strong>{{ warning.title }}:</strong> {{ warning.message }}{% if not loop.last %}<br>{% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="report-metrics">
+            <article class="report-metric">
+                <span class="field-label">ATTENDANCE</span>
+                <strong>{{ subject.attendance_percentage_display }}</strong>
+                <small>{{ subject.completed_classes }} of {{ subject.total_scheduled_classes }} scheduled classes completed</small>
+            </article>
+            <article class="report-metric metric-positive">
+                <span class="field-label">PRESENT</span>
+                <strong>{{ subject.present_classes }}</strong>
+                <small>{{ subject.no_class_entries }} no-class entries excluded</small>
+            </article>
+            <article class="report-metric metric-warning">
+                <span class="field-label">ABSENT</span>
+                <strong>{{ subject.absent_classes }}</strong>
+                <small>Maximum allowed: {{ subject.maximum_allowed_absences }}</small>
+            </article>
+            <article class="report-metric">
+                <span class="field-label">ABSENCES LEFT</span>
+                <strong>{{ subject.remaining_allowed_absences }}</strong>
+                <small>Minimum required: {{ "%.2f"|format(subject.minimum_percentage) }}%</small>
+            </article>
+        </div>
+
+        <div class="report-chart-grid subject-report-charts">
+            <article class="report-panel report-chart-panel report-chart-wide">
+                <div class="report-panel-heading">
+                    <div><span class="eyebrow">PROGRESS</span><h2>Attendance over time</h2></div>
+                </div>
+                {% if progress_chart %}
+                    <img class="report-chart" src="{{ progress_chart }}" alt="Cumulative attendance progress chart for {{ subject.subject_name }}">
+                {% else %}
+                    <p class="report-empty">Attendance progress will appear after a Present or Absent record is saved.</p>
+                {% endif %}
+            </article>
+            <article class="report-panel report-chart-panel">
+                <div class="report-panel-heading">
+                    <div><span class="eyebrow">CLASS RECORDS</span><h2>Present vs absent</h2></div>
+                </div>
+                {% if present_absent_chart %}
+                    <img class="report-chart report-chart-compact" src="{{ present_absent_chart }}" alt="Present and absent distribution for {{ subject.subject_name }}">
+                {% else %}
+                    <p class="report-empty">No completed attendance records yet.</p>
+                {% endif %}
+            </article>
+            <article class="report-panel report-chart-panel report-chart-wide">
+                <div class="report-panel-heading">
+                    <div><span class="eyebrow">MONTHLY TREND</span><h2>{{ year }} attendance</h2></div>
+                    <a class="text-link" href="{{ url_for('reports.monthly_report', subject_id=subject.subject_id, year=year) }}">Monthly details</a>
+                </div>
+                {% if monthly_chart %}
+                    <img class="report-chart" src="{{ monthly_chart }}" alt="Monthly attendance trend for {{ subject.subject_name }}">
+                {% else %}
+                    <p class="report-empty">Monthly attendance will appear when you record classes.</p>
+                {% endif %}
+            </article>
+        </div>
+
+        <section class="report-panel report-records-panel">
+            <div class="report-panel-heading">
+                <div><span class="eyebrow">ATTENDANCE HISTORY</span><h2>{{ records|length }} record{{ '' if records|length == 1 else 's' }}</h2></div>
+                <a class="text-link" href="{{ url_for('reports.datewise_report', subject_id=subject.subject_id) }}">Filter records</a>
+            </div>
+            {% if records %}
+                <div class="table-responsive">
+                    <table class="table report-table align-middle">
+                        <thead><tr><th>Date</th><th>Day</th><th>Period</th><th>Time</th><th>Status</th></tr></thead>
+                        <tbody>
+                            {% for record in records %}
+                                <tr>
+                                    <td>{{ record.attendance_date }}</td>
+                                    <td>{{ record.day_name }}</td>
+                                    <td>{{ record.period_number or "—" }}</td>
+                                    <td>{{ record.start_time }} – {{ record.end_time }}</td>
+                                    <td><span class="report-status report-status-{{ 'present' if record.status == 'P' else 'absent' if record.status == 'A' else 'no-class' }}">
+                                        {{ "Present" if record.status == "P" else "Absent" if record.status == "A" else "No class" }}
+                                    </span></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="report-empty">No attendance records are saved for this subject yet.</p>
+            {% endif %}
+        </section>
+    </div>
+</section>
+{% endblock %}

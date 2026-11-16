@@ -34,7 +34,7 @@
                                 <li><a class="dropdown-item" href="{{ url_for('attendance.attendance_history') }}">Attendance history</a></li>
                             </ul>
                         </div>
-                        <span class="nav-link nav-placeholder" aria-disabled="true">Reports <small>Coming soon</small></span>
+                        <a class="nav-link" href="{{ url_for('reports.reports_index') }}">Reports</a>
                         <form action="{{ url_for('auth.logout') }}" method="post" class="d-inline">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button class="btn btn-outline-primary btn-sm nav-action" type="submit">Log out</button>

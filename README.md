@@ -40,6 +40,10 @@ Open **Attendance** while signed in to mark each period from your saved weekly t
 
 Choose **Attendance overview** from the Attendance menu to view subject-wise present, absent, completed and no-class counts, attendance percentage, and allowed/remaining absences. These values are recalculated from saved attendance records whenever the overview loads. Reaching the absence limit displays an absent-deadline warning; exceeding it displays an attendance-shortage warning as well.
 
+### Reports
+
+Open **Reports** to view overall and subject-wise attendance charts, summaries, and alerts. Monthly and date-wise reports can be filtered by subject and attendance status; date-wise reports also accept a date range. Each report is limited to the signed-in student's records. Download an overall PDF or Excel workbook from the reports page, or download a subject-specific PDF or workbook from that subject's report.
+
 Run the automated attendance tests with:
 
 ```powershell

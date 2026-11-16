@@ -19,7 +19,7 @@
                 <a class="sidebar-link" href="{{ url_for('timetable.timetable') }}"><span>▦</span> Timetable</a>
                 <a class="sidebar-link" href="{{ url_for('attendance.daily_attendance') }}"><span>◷</span> Attendance</a>
                 <a class="sidebar-link" href="{{ url_for('attendance.attendance_overview') }}"><span>◔</span> Attendance overview</a>
-                <a class="sidebar-link disabled" href="#" aria-disabled="true" tabindex="-1"><span>▧</span> Reports <small>Coming soon</small></a>
+                <a class="sidebar-link" href="{{ url_for('reports.reports_index') }}"><span>▧</span> Reports</a>
             </aside>
             <div class="dashboard-main">
                 <div class="profile-heading">
@@ -30,6 +30,27 @@
                     <article class="profile-field"><span class="field-icon">✦</span><div><span class="field-label">STUDENT NAME</span><strong>{{ student.name }}</strong></div></article>
                     <article class="profile-field"><span class="field-icon field-icon-violet">#</span><div><span class="field-label">UNIVERSITY SEAT NUMBER</span><strong>{{ student.usn }}</strong></div></article>
                     <article class="profile-field"><span class="field-icon field-icon-green">@</span><div><span class="field-label">EMAIL ADDRESS</span><strong class="email-value">{{ student.email }}</strong></div></article>
+                </div>
+                <section class="dashboard-metrics" aria-label="Attendance summary">
+                    <article class="dashboard-metric">
+                        <span class="field-label">OVERALL ATTENDANCE</span>
+                        <strong>{{ attendance_summary.attendance_percentage_display }}</strong>
+                        <small>{{ attendance_summary.completed_classes }} completed classes</small>
+                    </article>
+                    <article class="dashboard-metric metric-positive">
+                        <span class="field-label">SUBJECTS SATISFACTORY</span>
+                        <strong>{{ attendance_summary.satisfactory_subjects }}</strong>
+                        <small>Meeting the minimum attendance</small>
+                    </article>
+                    <article class="dashboard-metric metric-warning">
+                        <span class="field-label">BELOW REQUIREMENT</span>
+                        <strong>{{ attendance_summary.below_required_subjects }}</strong>
+                        <small>{{ attendance_summary.absence_deadline_subjects }} absence deadline{{ '' if attendance_summary.absence_deadline_subjects == 1 else 's' }}</small>
+                    </article>
+                </section>
+                <div class="dashboard-report-link">
+                    <span>Review detailed monthly, subject and date-wise reports.</span>
+                    <a class="btn btn-primary btn-sm" href="{{ url_for('reports.reports_index') }}">Open reports</a>
                 </div>
                 <section class="subject-summary">
                     <div class="subject-summary-heading">
@@ -54,7 +75,7 @@
                     {% endif %}
                 </section>
                 <div class="dashboard-next">
-                    <div><span class="next-icon">✦</span><div><strong>Your workspace is ready</strong><p>Manage your subjects, timetable and daily attendance. Reports are coming soon.</p></div></div>
+                    <div><span class="next-icon">✦</span><div><strong>Your workspace is ready</strong><p>Manage your subjects, timetable, attendance and reports from one place.</p></div></div>
                 </div>
                 <form action="{{ url_for('auth.logout') }}" method="post">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
