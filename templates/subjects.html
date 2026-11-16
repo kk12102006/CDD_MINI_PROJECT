@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Your subjects{% endblock %}
+{% block content %}
+<section class="dashboard-section">
+    <div class="container">
+        <div class="page-heading">
+            <div>
+                <span class="eyebrow">YOUR ACADEMIC PLAN</span>
+                <h1>Subjects</h1>
+                <p>Manage your subjects and the class totals you entered.</p>
+            </div>
+            <a class="btn btn-primary" href="{{ url_for('subjects.add_subject') }}">＋ Add subject</a>
+        </div>
+
+        {% if subjects %}
+            <div class="subject-card-grid">
+                {% for subject in subjects %}
+                    <article class="subject-card">
+                        <div class="subject-card-top">
+                            <span class="subject-card-mark">{{ subject.subject_name[:1]|upper }}</span>
+                            <span class="subject-status"><span></span> Registered</span>
+                        </div>
+                        <h2>{{ subject.subject_name }}</h2>
+                        <div class="subject-details">
+                            <div>
+                                <span class="field-label">SCHEDULED CLASSES</span>
+                                <strong>{{ subject.total_scheduled_classes }}</strong>
+                            </div>
+                            <div>
+                                <span class="field-label">MINIMUM ATTENDANCE</span>
+                                <strong>{{ "%g"|format(subject.minimum_percentage) }}%</strong>
+                            </div>
+                        </div>
+                        <div class="subject-card-actions">
+                            <a class="btn btn-outline-primary btn-sm"
+                               href="{{ url_for('subjects.edit_subject', subject_id=subject.subject_id) }}">Edit</a>
+                            <form method="post"
+                                  action="{{ url_for('subjects.delete_subject', subject_id=subject.subject_id) }}"
+                                  data-confirm="Delete {{ subject.subject_name }}? This action cannot be undone.">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button class="btn btn-outline-danger btn-sm" type="submit">Delete</button>
+                            </form>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-subjects">
+                <span class="empty-subject-icon">▤</span>
+                <h2>No subjects added yet. Start by adding your first subject.</h2>
+                <p>Enter your own scheduled class total and minimum attendance requirement for each subject.</p>
+                <a class="btn btn-primary" href="{{ url_for('subjects.add_subject') }}">Add your first subject</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

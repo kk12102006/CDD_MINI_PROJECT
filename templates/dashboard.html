@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Your dashboard{% endblock %}
+{% block content %}
+<section class="dashboard-section">
+    <div class="container">
+        <div class="dashboard-welcome">
+            <div>
+                <span class="eyebrow">STUDENT SPACE</span>
+                <h1>Welcome, {{ student.name }}.</h1>
+                <p>Your academic home base is ready.</p>
+            </div>
+            <div class="welcome-mark" aria-hidden="true">✦</div>
+        </div>
+        <div class="dashboard-layout">
+            <aside class="dashboard-sidebar">
+                <span class="sidebar-label">YOUR WORKSPACE</span>
+                <a class="sidebar-link active" href="{{ url_for('dashboard.dashboard') }}"><span>▦</span> Dashboard</a>
+                <a class="sidebar-link" href="{{ url_for('subjects.list_subjects') }}"><span>▤</span> Subjects</a>
+                <a class="sidebar-link" href="{{ url_for('timetable.timetable') }}"><span>▦</span> Timetable</a>
+                <a class="sidebar-link disabled" href="#" aria-disabled="true" tabindex="-1"><span>◷</span> Attendance <small>Coming soon</small></a>
+                <a class="sidebar-link disabled" href="#" aria-disabled="true" tabindex="-1"><span>▧</span> Reports <small>Coming soon</small></a>
+            </aside>
+            <div class="dashboard-main">
+                <div class="profile-heading">
+                    <div><span class="eyebrow">YOUR PROFILE</span><h2>Student information</h2></div>
+                    <span class="profile-badge"><span></span> Account active</span>
+                </div>
+                <div class="profile-grid">
+                    <article class="profile-field"><span class="field-icon">✦</span><div><span class="field-label">STUDENT NAME</span><strong>{{ student.name }}</strong></div></article>
+                    <article class="profile-field"><span class="field-icon field-icon-violet">#</span><div><span class="field-label">UNIVERSITY SEAT NUMBER</span><strong>{{ student.usn }}</strong></div></article>
+                    <article class="profile-field"><span class="field-icon field-icon-green">@</span><div><span class="field-label">EMAIL ADDRESS</span><strong class="email-value">{{ student.email }}</strong></div></article>
+                </div>
+                <section class="subject-summary">
+                    <div class="subject-summary-heading">
+                        <div>
+                            <span class="eyebrow">SUBJECTS</span>
+                            <h2>Your subjects <span class="subject-count">{{ subject_count }}</span></h2>
+                        </div>
+                        <a class="btn btn-primary btn-sm" href="{{ url_for('subjects.list_subjects') }}">Manage subjects</a>
+                    </div>
+                    {% if recent_subjects %}
+                        <div class="recent-subject-list">
+                            {% for subject in recent_subjects %}
+                                <div class="recent-subject">
+                                    <span class="recent-subject-mark">{{ subject.subject_name[:1]|upper }}</span>
+                                    <span class="recent-subject-name">{{ subject.subject_name }}</span>
+                                    <span class="recent-subject-classes">{{ subject.total_scheduled_classes }} scheduled classes</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="empty-summary">No subjects added yet. Add your first subject to get started.</p>
+                    {% endif %}
+                </section>
+                <div class="dashboard-next">
+                    <div><span class="next-icon">✦</span><div><strong>Your workspace is ready</strong><p>Subjects, timetable, attendance and reports will be available in upcoming updates.</p></div></div>
+                </div>
+                <form action="{{ url_for('auth.logout') }}" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-outline-primary logout-button" type="submit">Log out of your account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
