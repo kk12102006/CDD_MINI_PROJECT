@@ -53,6 +53,31 @@ def init_db(database_path: str) -> None:
         )
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS tasks (
+                task_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id INTEGER NOT NULL,
+                subject_id INTEGER,
+                title TEXT NOT NULL CHECK (length(trim(title)) > 0),
+                description TEXT,
+                deadline TEXT NOT NULL
+                    CHECK (
+                        length(deadline) = 10
+                        AND date(deadline) IS NOT NULL
+                        AND date(deadline) = deadline
+                    ),
+                status TEXT NOT NULL DEFAULT 'Pending'
+                    CHECK (status IN ('Pending', 'Completed')),
+                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                completed_at TIMESTAMP,
+                FOREIGN KEY (student_id) REFERENCES students(student_id)
+                    ON DELETE CASCADE,
+                FOREIGN KEY (subject_id) REFERENCES subjects(subject_id)
+                    ON DELETE SET NULL
+            )
+            """
+        )
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS timetable_entries (
                 timetable_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 student_id INTEGER NOT NULL,
@@ -73,6 +98,12 @@ def init_db(database_path: str) -> None:
             """
             CREATE INDEX IF NOT EXISTS idx_subjects_student_created_at
             ON subjects (student_id, created_at DESC, subject_id DESC)
+            """
+        )
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS idx_tasks_student_status_deadline
+            ON tasks (student_id, status, deadline, created_at, task_id)
             """
         )
         connection.execute(

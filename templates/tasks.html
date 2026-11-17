@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}Your tasks{% endblock %}
+{% macro task_cards(items, category) %}
+    {% if items %}
+        <div class="task-card-list">
+            {% for task in items %}
+                <article class="task-card {% if category == 'overdue' %}task-card-overdue{% elif category == 'completed' %}task-card-completed{% endif %}">
+                    <div class="task-card-content">
+                        <div class="task-card-title-row">
+                            <h3>{{ task.title }}</h3>
+                            {% if category == "overdue" %}
+                                <span class="badge text-bg-danger">OVERDUE</span>
+                            {% elif category == "completed" %}
+                                <span class="badge text-bg-success">COMPLETED</span>
+                            {% else %}
+                                <span class="badge text-bg-primary">PENDING</span>
+                            {% endif %}
+                        </div>
+                        {% if task.subject_name %}
+                            <p class="task-subject">{{ task.subject_name }}</p>
+                        {% endif %}
+                        {% if task.description %}
+                            <p class="task-description">{{ task.description }}</p>
+                        {% endif %}
+                        <div class="task-deadline">
+                            <span>Deadline: {{ task.deadline }}</span>
+                            {% if category == "overdue" %}
+                                <strong class="text-danger">OVERDUE – {{ -task.days_remaining }} DAY{{ '' if task.days_remaining == -1 else 'S' }}</strong>
+                            {% elif category == "pending" and task.days_remaining == 0 %}
+                                <strong class="text-warning-emphasis">DUE TODAY</strong>
+                            {% elif category == "pending" %}
+                                <strong>{{ task.days_remaining }} day{{ '' if task.days_remaining == 1 else 's' }} remaining</strong>
+                            {% elif task.completed_at %}
+                                <span>Completed {{ task.completed_at }}</span>
+                            {% endif %}
+                        </div>
+                        <small class="task-created">Created {{ task.created_at }}</small>
+                    </div>
+                    <div class="task-card-actions">
+                        <a class="btn btn-outline-primary btn-sm"
+                           href="{{ url_for('tasks.edit_task', task_id=task.task_id) }}">Edit</a>
+                        {% if category == "completed" %}
+                            <form method="post" action="{{ url_for('tasks.reopen_task', task_id=task.task_id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button class="btn btn-outline-secondary btn-sm" type="submit">Reopen</button>
+                            </form>
+                        {% else %}
+                            <form method="post" action="{{ url_for('tasks.complete_task', task_id=task.task_id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button class="btn btn-outline-success btn-sm" type="submit">Complete</button>
+                            </form>
+                        {% endif %}
+                        <form method="post"
+                              action="{{ url_for('tasks.delete_task', task_id=task.task_id) }}"
+                              data-confirm="Delete {{ task.title }}? This action cannot be undone.">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="btn btn-outline-danger btn-sm" type="submit">Delete</button>
+                        </form>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="task-empty-message">
+            {% if category == "overdue" %}
+                No overdue tasks.
+            {% elif category == "completed" %}
+                No completed tasks yet.
+            {% else %}
+                No pending tasks.
+            {% endif %}
+        </p>
+    {% endif %}
+{% endmacro %}
+{% block content %}
+<section class="dashboard-section">
+    <div class="container">
+        <div class="page-heading">
+            <div>
+                <span class="eyebrow">YOUR ACADEMIC PLAN</span>
+                <h1>Tasks</h1>
+                <p>Keep academic and personal work on track with deadlines and reminders.</p>
+            </div>
+            <a class="btn btn-primary" href="#add-task">＋ Add task</a>
+        </div>
+
+        <section class="task-form-card" id="add-task" aria-labelledby="add-task-heading">
+            <div class="task-summary-heading">
+                <div>
+                    <span class="eyebrow">NEW TASK</span>
+                    <h2 id="add-task-heading">Add a task</h2>
+                </div>
+            </div>
+            <form method="post" action="{{ url_for('tasks.add_task') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="task-title">Task title</label>
+                        <input class="form-control" id="task-title" name="title" type="text"
+                               maxlength="200" value="{{ form_data.title if form_data else '' }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="task-deadline">Deadline</label>
+                        <input class="form-control" id="task-deadline" name="deadline" type="date"
+                               value="{{ form_data.deadline if form_data else '' }}" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="task-subject">Subject <span class="text-muted">(optional)</span></label>
+                        <select class="form-select" id="task-subject" name="subject_id">
+                            <option value="">General task</option>
+                            {% for subject in subjects %}
+                                <option value="{{ subject.subject_id }}"
+                                    {% if form_data and form_data.subject_id == subject.subject_id|string %}selected{% endif %}>
+                                    {{ subject.subject_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="task-description">Description <span class="text-muted">(optional)</span></label>
+                        <textarea class="form-control task-description-input" id="task-description" name="description"
+                                  rows="2">{{ form_data.description if form_data else '' }}</textarea>
+                    </div>
+                </div>
+                <button class="btn btn-primary" type="submit">Save task</button>
+            </form>
+        </section>
+
+        <section class="task-section" aria-labelledby="overdue-tasks-heading">
+            <div class="task-section-heading">
+                <h2 id="overdue-tasks-heading">Overdue Tasks <span class="task-count">{{ overdue_tasks|length }}</span></h2>
+            </div>
+            {{ task_cards(overdue_tasks, "overdue") }}
+        </section>
+
+        <section class="task-section" aria-labelledby="pending-tasks-heading">
+            <div class="task-section-heading">
+                <h2 id="pending-tasks-heading">Pending Tasks <span class="task-count">{{ pending_tasks|length }}</span></h2>
+            </div>
+            {{ task_cards(pending_tasks, "pending") }}
+        </section>
+
+        <section class="task-section" aria-labelledby="completed-tasks-heading">
+            <div class="task-section-heading">
+                <h2 id="completed-tasks-heading">Completed Tasks <span class="task-count">{{ completed_tasks|length }}</span></h2>
+            </div>
+            {{ task_cards(completed_tasks, "completed") }}
+        </section>
+    </div>
+</section>
+{% endblock %}

@@ -4,6 +4,7 @@ from database.db_connection import get_db_connection
 from routes.auth import login_required
 from services.report_service import get_overall_summary
 from services.attendance_calculator import get_subject_attendance_overview
+from services.task_service import get_remaining_tasks
 
 
 dashboard_bp = Blueprint("dashboard", __name__)
@@ -47,10 +48,12 @@ def dashboard():
     attendance_summary = get_overall_summary(
         get_subject_attendance_overview(session["student_id"])
     )
+    remaining_tasks = get_remaining_tasks(session["student_id"])
     return render_template(
         "dashboard.html",
         student=student,
         subject_count=subject_count,
         recent_subjects=recent_subjects,
         attendance_summary=attendance_summary,
+        remaining_tasks=remaining_tasks,
     )

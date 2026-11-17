@@ -10,6 +10,7 @@ from routes.attendance import attendance_bp
 from routes.dashboard import dashboard_bp
 from routes.reports import reports_bp
 from routes.subjects import subjects_bp
+from routes.tasks import tasks_bp
 from routes.timetable import timetable_bp
 
 
@@ -23,6 +24,7 @@ def create_app(config_object=Config):
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(reports_bp)
     app.register_blueprint(subjects_bp)
+    app.register_blueprint(tasks_bp)
     app.register_blueprint(timetable_bp)
     return app
 

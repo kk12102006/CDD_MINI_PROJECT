@@ -44,6 +44,10 @@ Choose **Attendance overview** from the Attendance menu to view subject-wise pre
 
 Open **Reports** to view overall and subject-wise attendance charts, summaries, and alerts. Monthly and date-wise reports can be filtered by subject and attendance status; date-wise reports also accept a date range. Each report is limited to the signed-in student's records. Download an overall PDF or Excel workbook from the reports page, or download a subject-specific PDF or workbook from that subject's report.
 
+### Tasks and deadline reminders
+
+Open **Tasks** to create and manage academic or personal tasks. Tasks can optionally be linked to one of your subjects; task records are private to the signed-in student. Pending tasks appear in the dashboard's **REMAINING TASKS** section starting seven days before their deadline and remain visible there until completed, including after becoming overdue. The task page separates overdue, pending, and completed tasks. Completing a task records its completion time; reopening it clears that time.
+
 Run the automated attendance tests with:
 
 ```powershell
