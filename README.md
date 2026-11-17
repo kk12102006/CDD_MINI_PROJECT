@@ -28,6 +28,8 @@ The app loads `.env` from the project directory. Set `SMTP_EMAIL` to the Gmail a
 
 Signed-in students can enable attendance and task notifications independently from **Notification Preferences** on the dashboard and select separate 24-hour times. Preferences default to disabled to avoid sending email before a student opts in. Notifications go to the email address already on the student's account.
 
+At the configured task-notification time, one email bundles all pending task reminders due within seven days, including tasks due today or overdue. Deadlines from yesterday through tomorrow are labeled **Yesterday**, **Today**, or **Tomorrow**; other deadlines show their date.
+
 `python app.py` starts the web app and its single-instance scheduler for local use. In production, run one persistent scheduler process alongside the web workers with `python notification_scheduler.py`; web workers do not each start their own scheduler. The scheduler checks preferences every minute and uses SQLite uniqueness constraints to prevent repeat sends. Keep the scheduler process running under a service manager (for example, systemd, a Windows service, or a process supervisor). Platforms that suspend background processes need a separate always-on worker or scheduled-job service.
 
 Email failures are recorded in `notification_logs` and are not retried during the same calendar day; the next scheduled day can try again. If the scheduler starts after a student's configured time, that day's unsent notification is picked up on its next check. Without valid SMTP settings, email attempts are logged as failed. Use a test account or controlled test addresses to verify delivery; the automated tests mock SMTP and do not send real email.

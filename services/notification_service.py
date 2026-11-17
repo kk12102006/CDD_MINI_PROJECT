@@ -167,6 +167,7 @@ def _process_task_notifications(student, tasks, current_date, scheduled_time):
         return
 
     reminder_tasks = []
+    skipped_notification_ids = []
     with get_db_connection() as connection:
         for notification_id, task_id in claimed_tasks:
             current_task = connection.execute(
@@ -184,31 +185,41 @@ def _process_task_notifications(student, tasks, current_date, scheduled_time):
                 else None
             )
             if task_status is None:
-                _finish_notification(notification_id, "skipped")
+                skipped_notification_ids.append(notification_id)
                 continue
             reminder_tasks.append(
                 (notification_id, current_task, task_status)
             )
 
+    for notification_id in skipped_notification_ids:
+        _finish_notification(notification_id, "skipped")
+
     if not reminder_tasks:
         return
 
-    task_lines = []
+    task_sections = []
     for _, task, task_status in reminder_tasks:
-        deadline = date.fromisoformat(task["deadline"]).strftime("%d %B %Y")
-        task_lines.extend(
-            (
-                f"Task: {task['title']}",
-                f"Status: {task_status}",
-                f"Deadline: {deadline}",
-                "",
+        deadline_date = date.fromisoformat(task["deadline"])
+        days_from_today = (deadline_date - current_date).days
+        deadline = {
+            -1: "Yesterday",
+            0: "Today",
+            1: "Tomorrow",
+        }.get(days_from_today, deadline_date.strftime("%d %B %Y"))
+        task_sections.append(
+            "\n".join(
+                (
+                    f"Task: {task['title']}",
+                    f"Status: {task_status}",
+                    f"Deadline: {deadline}",
+                )
             )
         )
     body = (
         f"Dear {student['name']},\n\n"
         "Here are your pending task reminders:\n\n"
-        + "\n".join(task_lines)
-        + "Please complete your tasks before their deadlines.\n\n"
+        + "\n\n".join(task_sections)
+        + "\n\nPlease complete your tasks before their deadlines.\n\n"
         "Regards,\nStudent Attendance Manager."
     )
     sent, error_code = send_email(

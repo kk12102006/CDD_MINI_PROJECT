@@ -237,6 +237,7 @@ class NotificationTests(unittest.TestCase):
     def test_task_emails_classify_dates_skip_completed_and_prevent_duplicates(self):
         self._add_task(self.alice_id, "Ten days", 10)
         upcoming_id = self._add_task(self.alice_id, "Seven days", 7)
+        self._add_task(self.alice_id, "Tomorrow", 1)
         self._add_task(self.alice_id, "Three days", 3)
         self._add_task(self.alice_id, "Due today", 0)
         self._add_task(self.alice_id, "Overdue", -1)
@@ -258,10 +259,21 @@ class NotificationTests(unittest.TestCase):
                 "Task Reminder – Student Attendance Manager",
             )
             body = send.call_args.args[3]
-            self.assertIn("Task: Seven days\nStatus: Upcoming.", body)
-            self.assertIn("Task: Three days\nStatus: Upcoming.", body)
-            self.assertIn("Task: Due today\nStatus: Due Today.", body)
-            self.assertIn("Task: Overdue\nStatus: Overdue.", body)
+            self.assertIn("Task: Seven days\nStatus: Upcoming\n", body)
+            self.assertIn(
+                "Task: Tomorrow\nStatus: Upcoming\nDeadline: Tomorrow",
+                body,
+            )
+            self.assertIn("Task: Three days\nStatus: Upcoming\n", body)
+            self.assertIn("Deadline: 20 November 2026", body)
+            self.assertIn(
+                "Task: Due today\nStatus: Due Today\nDeadline: Today",
+                body,
+            )
+            self.assertIn(
+                "Task: Overdue\nStatus: Overdue\nDeadline: Yesterday",
+                body,
+            )
             self.assertNotIn("Ten days", body)
             self.assertNotIn("Completed", body)
 
@@ -285,11 +297,16 @@ class NotificationTests(unittest.TestCase):
             next_day_body = send.call_args.args[3]
             self.assertNotIn("Seven days", next_day_body)
             self.assertIn("Task: Three days", next_day_body)
+            self.assertIn(
+                "Task: Tomorrow\nStatus: Due Today\n"
+                "Deadline: Today",
+                next_day_body,
+            )
 
         logs = self._logs(self.alice_id)
         self.assertEqual(
             sum(row["notification_type"] == "task" for row in logs),
-            7,
+            9,
         )
 
     def test_disabled_notifications_and_failed_delivery_are_recorded(self):
