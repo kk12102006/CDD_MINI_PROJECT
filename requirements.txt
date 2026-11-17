@@ -6,3 +6,6 @@ matplotlib
 Pillow
 reportlab
 openpyxl
+APScheduler>=3.10,<4
+filelock>=3.13,<4
+python-dotenv>=1.0,<2

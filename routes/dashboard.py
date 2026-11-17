@@ -44,6 +44,15 @@ def dashboard():
             """,
             (session["student_id"],),
         ).fetchall()
+        preferences = connection.execute(
+            """
+            SELECT attendance_enabled, attendance_time,
+                   task_enabled, task_time
+            FROM notification_preferences
+            WHERE student_id = ?
+            """,
+            (session["student_id"],),
+        ).fetchone()
 
     attendance_summary = get_overall_summary(
         get_subject_attendance_overview(session["student_id"])
@@ -56,4 +65,5 @@ def dashboard():
         recent_subjects=recent_subjects,
         attendance_summary=attendance_summary,
         remaining_tasks=remaining_tasks,
+        notification_preferences=preferences,
     )

@@ -78,18 +78,34 @@ def calculate_subject_attendance(subject, counts):
     }
 
 
-def get_subject_attendance_overview(student_id):
+def get_subject_attendance_overview(student_id, subject_ids=None):
+    subject_ids = tuple(subject_ids) if subject_ids is not None else None
+    if subject_ids is not None and not subject_ids:
+        return []
+
+    subject_filter = ""
+    subject_parameters = ()
+    if subject_ids is not None:
+        placeholders = ", ".join("?" for _ in subject_ids)
+        subject_filter = f" AND subject_id IN ({placeholders})"
+        subject_parameters = subject_ids
+
     with get_db_connection() as connection:
         subjects = connection.execute(
-            """
+            f"""
             SELECT subject_id, subject_name, total_scheduled_classes,
                    minimum_percentage
             FROM subjects
-            WHERE student_id = ?
+            WHERE student_id = ?{subject_filter}
             ORDER BY subject_name COLLATE NOCASE, subject_id
             """,
-            (student_id,),
+            (student_id, *subject_parameters),
         ).fetchall()
+        attendance_subject_filter = ""
+        if subject_ids is not None:
+            attendance_subject_filter = (
+                " AND te.subject_id IN (" + placeholders + ")"
+            )
         counts_by_subject = {
             row["subject_id"]: {
                 "present": row["present_classes"],
@@ -97,7 +113,7 @@ def get_subject_attendance_overview(student_id):
                 "no_class": row["no_class_entries"],
             }
             for row in connection.execute(
-                """
+                f"""
                 SELECT te.subject_id,
                        SUM(CASE WHEN ar.status = 'P' THEN 1 ELSE 0 END)
                            AS present_classes,
@@ -113,9 +129,10 @@ def get_subject_attendance_overview(student_id):
                   ON s.subject_id = te.subject_id
                  AND s.student_id = te.student_id
                 WHERE ar.student_id = ?
+                  {attendance_subject_filter}
                 GROUP BY te.subject_id
                 """,
-                (student_id,),
+                (student_id, *subject_parameters),
             ).fetchall()
         }
 

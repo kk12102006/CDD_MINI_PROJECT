@@ -100,6 +100,47 @@
                         <p class="task-empty-message">No pending tasks at the moment. You are all caught up!</p>
                     {% endif %}
                 </section>
+                <section class="notification-preferences" aria-labelledby="notification-preferences-heading">
+                    <div class="task-summary-heading">
+                        <div>
+                            <span class="eyebrow">EMAIL REMINDERS</span>
+                            <h2 id="notification-preferences-heading">Notification Preferences</h2>
+                            <p>Notifications are sent to {{ student.email }} using Asia/Kolkata time.</p>
+                        </div>
+                    </div>
+                    <form method="post" action="{{ url_for('notification_settings.save_notification_preferences') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="row g-3">
+                            <div class="col-lg-6">
+                                <div class="notification-setting">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" id="attendance-enabled"
+                                               name="attendance_enabled" type="checkbox" value="1"
+                                               {% if notification_preferences.attendance_enabled %}checked{% endif %}>
+                                        <label class="form-check-label" for="attendance-enabled">Attendance Notifications</label>
+                                    </div>
+                                    <label class="form-label mt-3" for="attendance-time">Preferred attendance notification time</label>
+                                    <input class="form-control" id="attendance-time" name="attendance_time"
+                                           type="time" value="{{ notification_preferences.attendance_time }}" required>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="notification-setting">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" id="task-enabled"
+                                               name="task_enabled" type="checkbox" value="1"
+                                               {% if notification_preferences.task_enabled %}checked{% endif %}>
+                                        <label class="form-check-label" for="task-enabled">Task Notifications</label>
+                                    </div>
+                                    <label class="form-label mt-3" for="task-time">Preferred task notification time</label>
+                                    <input class="form-control" id="task-time" name="task_time"
+                                           type="time" value="{{ notification_preferences.task_time }}" required>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary mt-3" type="submit">Save Settings</button>
+                    </form>
+                </section>
                 <div class="dashboard-report-link">
                     <span>Review detailed monthly, subject and date-wise reports.</span>
                     <a class="btn btn-primary btn-sm" href="{{ url_for('reports.reports_index') }}">Open reports</a>
