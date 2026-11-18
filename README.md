@@ -22,6 +22,24 @@ python app.py
 
 Open [http://127.0.0.1:5000](http://127.0.0.1:5000). The SQLite database and tables are initialized automatically in `attendance.db`. Existing student accounts are preserved during initialization.
 
+### Run with Docker
+
+Install Docker Engine with the Compose plugin, then from the `StudentAttendanceManager` directory create the private environment file:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Set a stable, randomly generated `SECRET_KEY` in `.env` before starting the application. SMTP settings are optional unless email notifications are enabled.
+
+```powershell
+docker compose up --build -d
+```
+
+Open [http://localhost:5000](http://localhost:5000). Docker runs the Flask app with Gunicorn and runs the notification scheduler as a separate service. Both services use the `attendance_data` volume for the SQLite database and uploaded timetable PDFs, so the data survives container recreation. `docker compose down` stops the services without deleting this volume.
+
+Use `docker compose logs -f` to view service logs and `docker compose down` to stop the application. Keep `.env` private; it is not included in the Docker image.
+
 ### Email notifications
 
 The app loads `.env` from the project directory. Set `SMTP_EMAIL` to the Gmail account used to send notifications and `SMTP_APP_PASSWORD` to a Google App Password (not the Gmail sign-in password). Google requires 2-Step Verification before an App Password can be created. Keep `.env` private; it is excluded by `.gitignore`. `SMTP_HOST`, `SMTP_PORT`, and `NOTIFICATION_TIMEZONE` default to `smtp.gmail.com`, `587`, and `Asia/Kolkata`.
