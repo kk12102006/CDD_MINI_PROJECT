@@ -58,6 +58,7 @@ class AttendanceTests(unittest.TestCase):
                 "subject_name": subject_name,
                 "total_scheduled_classes": str(total_classes),
                 "minimum_percentage": "75",
+                "credits": "1",
             },
         )
         self.assertEqual(response.status_code, 302)

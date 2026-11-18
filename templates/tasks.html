@@ -128,21 +128,21 @@
             </form>
         </section>
 
-        <section class="task-section" aria-labelledby="overdue-tasks-heading">
+        <section class="task-section task-section-overdue" aria-labelledby="overdue-tasks-heading">
             <div class="task-section-heading">
                 <h2 id="overdue-tasks-heading">Overdue Tasks <span class="task-count">{{ overdue_tasks|length }}</span></h2>
             </div>
             {{ task_cards(overdue_tasks, "overdue") }}
         </section>
 
-        <section class="task-section" aria-labelledby="pending-tasks-heading">
+        <section class="task-section task-section-pending" aria-labelledby="pending-tasks-heading">
             <div class="task-section-heading">
                 <h2 id="pending-tasks-heading">Pending Tasks <span class="task-count">{{ pending_tasks|length }}</span></h2>
             </div>
             {{ task_cards(pending_tasks, "pending") }}
         </section>
 
-        <section class="task-section" aria-labelledby="completed-tasks-heading">
+        <section class="task-section task-section-completed" aria-labelledby="completed-tasks-heading">
             <div class="task-section-heading">
                 <h2 id="completed-tasks-heading">Completed Tasks <span class="task-count">{{ completed_tasks|length }}</span></h2>
             </div>

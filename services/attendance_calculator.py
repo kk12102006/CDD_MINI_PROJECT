@@ -94,7 +94,7 @@ def get_subject_attendance_overview(student_id, subject_ids=None):
         subjects = connection.execute(
             f"""
             SELECT subject_id, subject_name, total_scheduled_classes,
-                   minimum_percentage
+                   minimum_percentage, credits
             FROM subjects
             WHERE student_id = ?{subject_filter}
             ORDER BY subject_name COLLATE NOCASE, subject_id
@@ -137,12 +137,15 @@ def get_subject_attendance_overview(student_id, subject_ids=None):
         }
 
     return [
-        calculate_subject_attendance(
-            subject,
-            counts_by_subject.get(
-                subject["subject_id"],
-                {"present": 0, "absent": 0, "no_class": 0},
+        {
+            **calculate_subject_attendance(
+                subject,
+                counts_by_subject.get(
+                    subject["subject_id"],
+                    {"present": 0, "absent": 0, "no_class": 0},
+                ),
             ),
-        )
+            "credits": subject["credits"],
+        }
         for subject in subjects
     ]

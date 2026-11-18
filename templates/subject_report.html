@@ -7,7 +7,7 @@
             <div>
                 <span class="eyebrow">SUBJECT REPORT</span>
                 <h1>{{ subject.subject_name }}</h1>
-                <p>Progress, attendance history and allowed absences.</p>
+                <p>{{ subject.credits }} credits · Progress, attendance history and allowed absences.</p>
             </div>
             <div class="report-actions">
                 <a class="btn btn-outline-primary" href="{{ url_for('reports.download_subject_pdf_report', subject_id=subject.subject_id) }}">Download PDF</a>

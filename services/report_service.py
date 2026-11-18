@@ -356,7 +356,7 @@ def create_subject_attendance_chart(subjects):
 
     figure = Figure(
         figsize=(max(8, len(subjects) * 0.9), 4.2),
-        facecolor="white",
+        facecolor="#fbfdfe",
         constrained_layout=True,
     )
     axes = figure.add_subplot(1, 1, 1)
@@ -374,14 +374,14 @@ def create_subject_attendance_chart(subjects):
         actual,
         width,
         label="Attendance",
-        color="#2864dc",
+        color="#16786f",
     )
     axes.bar(
         [position + width / 2 for position in positions],
         required,
         width,
         label="Minimum required",
-        color="#8bb49f",
+        color="#81b7a4",
     )
     for index, bar in enumerate(actual_bars):
         subject = subjects[index]
@@ -415,7 +415,7 @@ def create_subject_comparison_chart(subjects):
     ordered = list(reversed(subjects))
     figure = Figure(
         figsize=(8, max(3.2, len(subjects) * 0.48)),
-        facecolor="white",
+        facecolor="#fbfdfe",
         constrained_layout=True,
     )
     axes = figure.add_subplot(1, 1, 1)
@@ -427,11 +427,11 @@ def create_subject_comparison_chart(subjects):
         for item in ordered
     ]
     colors = [
-        "#dc6670"
+        "#d66d74"
         if item["attendance_status"] == "below_required"
-        else "#47a786"
+        else "#318f76"
         if item["attendance_status"] == "satisfactory"
-        else "#aab5c4"
+        else "#91a1ab"
         for item in ordered
     ]
     bars = axes.barh(positions, percentages, color=colors, height=0.62)
@@ -452,7 +452,7 @@ def create_subject_comparison_chart(subjects):
         marker="|",
         s=180,
         linewidths=2,
-        color="#253c5b",
+        color="#18313f",
         label="Minimum required",
         zorder=3,
     )
@@ -471,12 +471,12 @@ def create_present_absent_chart(present, absent):
     if present + absent == 0:
         return None
 
-    figure = Figure(figsize=(5.4, 4.1), facecolor="white", constrained_layout=True)
+    figure = Figure(figsize=(5.4, 4.1), facecolor="#fbfdfe", constrained_layout=True)
     axes = figure.add_subplot(1, 1, 1)
     axes.pie(
         [present, absent],
         labels=[f"Present ({present})", f"Absent ({absent})"],
-        colors=["#47a786", "#dc6670"],
+        colors=["#318f76", "#d66d74"],
         autopct="%1.1f%%",
         startangle=90,
         wedgeprops={"width": 0.46, "edgecolor": "white"},
@@ -490,7 +490,7 @@ def create_monthly_attendance_chart(series, year, title="Monthly attendance"):
     if not series or not any(month["completed"] for month in series):
         return None
 
-    figure = Figure(figsize=(9, 4.5), facecolor="white", constrained_layout=True)
+    figure = Figure(figsize=(9, 4.5), facecolor="#fbfdfe", constrained_layout=True)
     axes = figure.add_subplot(1, 1, 1)
     positions = list(range(len(series)))
     width = 0.36
@@ -499,14 +499,14 @@ def create_monthly_attendance_chart(series, year, title="Monthly attendance"):
         [month["present"] for month in series],
         width,
         label="Present",
-        color="#47a786",
+        color="#318f76",
     )
     axes.bar(
         [position + width / 2 for position in positions],
         [month["absent"] for month in series],
         width,
         label="Absent",
-        color="#dc6670",
+        color="#d66d74",
     )
     axes.set_xticks(positions)
     axes.set_xticklabels([month["month_name"] for month in series])
@@ -523,7 +523,7 @@ def create_monthly_attendance_chart(series, year, title="Monthly attendance"):
     percentage_axes.plot(
         positions,
         percentage_points,
-        color="#2864dc",
+        color="#16786f",
         marker="o",
         linewidth=2,
         label="Attendance percentage",
@@ -540,7 +540,7 @@ def create_attendance_progress_chart(series, subject_name, minimum_percentage):
     if not series:
         return None
 
-    figure = Figure(figsize=(9, 4.2), facecolor="white", constrained_layout=True)
+    figure = Figure(figsize=(9, 4.2), facecolor="#fbfdfe", constrained_layout=True)
     axes = figure.add_subplot(1, 1, 1)
     dates = [
         date.fromisoformat(item["attendance_date"])
@@ -551,13 +551,13 @@ def create_attendance_progress_chart(series, subject_name, minimum_percentage):
         dates,
         percentages,
         marker="o",
-        color="#2864dc",
+        color="#16786f",
         linewidth=2,
         label="Attendance",
     )
     axes.axhline(
         minimum_percentage,
-        color="#e0a52e",
+        color="#c28b34",
         linestyle="--",
         linewidth=1.5,
         label=f"Minimum required ({minimum_percentage:g}%)",

@@ -17,10 +17,13 @@ def _form_values():
             "total_scheduled_classes", ""
         ).strip(),
         "minimum_percentage": request.form.get("minimum_percentage", "").strip(),
+        "credits": request.form.get("credits", "").strip(),
     }
 
 
 def _validate_subject(values):
+    if not values["credits"]:
+        return "Credits are required.", None
     if not all(values.values()):
         return "Please complete every field.", None
     if len(values["subject_name"]) > 120:
@@ -42,7 +45,14 @@ def _validate_subject(values):
     if not math.isfinite(minimum_percentage) or not 1 <= minimum_percentage <= 100:
         return "Minimum attendance percentage must be between 1 and 100.", None
 
-    return None, (total_scheduled_classes, minimum_percentage)
+    try:
+        credits = float(values["credits"])
+    except ValueError:
+        return "Credits must be a positive number.", None
+    if not math.isfinite(credits) or credits <= 0:
+        return "Credits must be a positive number.", None
+
+    return None, (total_scheduled_classes, minimum_percentage, credits)
 
 
 def _get_owned_subject(subject_id):
@@ -50,7 +60,7 @@ def _get_owned_subject(subject_id):
         return connection.execute(
             """
             SELECT subject_id, subject_name, total_scheduled_classes,
-                   minimum_percentage, created_at
+                   minimum_percentage, credits, created_at
             FROM subjects
             WHERE subject_id = ? AND student_id = ?
             """,
@@ -65,7 +75,7 @@ def list_subjects():
         subjects = connection.execute(
             """
             SELECT subject_id, subject_name, total_scheduled_classes,
-                   minimum_percentage, created_at
+                   minimum_percentage, credits, created_at
             FROM subjects
             WHERE student_id = ?
             ORDER BY subject_name COLLATE NOCASE, subject_id
@@ -87,7 +97,7 @@ def add_subject():
         flash(error, "danger")
         return render_template("add_subject.html", form_data=values)
 
-    total_scheduled_classes, minimum_percentage = parsed
+    total_scheduled_classes, minimum_percentage, credits = parsed
     try:
         with get_db_connection() as connection:
             duplicate = connection.execute(
@@ -105,15 +115,16 @@ def add_subject():
                 """
                 INSERT INTO subjects (
                     student_id, subject_name, total_scheduled_classes,
-                    minimum_percentage
+                    minimum_percentage, credits
                 )
-                VALUES (?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?)
                 """,
                 (
                     session["student_id"],
                     values["subject_name"],
                     total_scheduled_classes,
                     minimum_percentage,
+                    credits,
                 ),
             )
     except sqlite3.IntegrityError:
@@ -143,7 +154,7 @@ def edit_subject(subject_id):
             "edit_subject.html", subject=subject, form_data=values
         )
 
-    total_scheduled_classes, minimum_percentage = parsed
+    total_scheduled_classes, minimum_percentage, credits = parsed
     try:
         with get_db_connection() as connection:
             duplicate = connection.execute(
@@ -163,13 +174,14 @@ def edit_subject(subject_id):
                 """
                 UPDATE subjects
                 SET subject_name = ?, total_scheduled_classes = ?,
-                    minimum_percentage = ?
+                    minimum_percentage = ?, credits = ?
                 WHERE subject_id = ? AND student_id = ?
                 """,
                 (
                     values["subject_name"],
                     total_scheduled_classes,
                     minimum_percentage,
+                    credits,
                     subject_id,
                     session["student_id"],
                 ),

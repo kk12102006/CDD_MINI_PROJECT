@@ -79,6 +79,7 @@ def init_db(database_path: str) -> None:
                 subject_name TEXT COLLATE NOCASE NOT NULL,
                 total_scheduled_classes INTEGER NOT NULL,
                 minimum_percentage REAL NOT NULL,
+                credits REAL NOT NULL DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE (student_id, subject_name),
                 FOREIGN KEY (student_id) REFERENCES students(student_id)
@@ -86,6 +87,13 @@ def init_db(database_path: str) -> None:
             )
             """
         )
+        subject_columns = {
+            row[1] for row in connection.execute("PRAGMA table_info(subjects)")
+        }
+        if "credits" not in subject_columns:
+            connection.execute(
+                "ALTER TABLE subjects ADD COLUMN credits REAL NOT NULL DEFAULT 0"
+            )
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS tasks (

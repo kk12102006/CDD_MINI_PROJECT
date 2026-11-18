@@ -1,6 +1,6 @@
 # Student Attendance Manager
 
-A browser-based Flask application for student accounts, a private dashboard, subject management, weekly timetable management, and daily attendance. Subjects can be registered, edited, and deleted by their owner; scheduled class totals are entered manually.
+A browser-based Flask application for student accounts, a private dashboard, subject management, weekly timetable management, and daily attendance. Subjects can be registered, edited, and deleted by their owner; scheduled class totals are entered manually, and each subject stores a positive credit value (including decimals).
 
 ## Requirements
 
@@ -20,7 +20,7 @@ Copy-Item .env.example .env
 python app.py
 ```
 
-Open [http://127.0.0.1:5000](http://127.0.0.1:5000). The SQLite database and tables are initialized automatically in `attendance.db`. Existing student accounts are preserved during initialization.
+Open [http://127.0.0.1:5000](http://127.0.0.1:5000). The SQLite database and tables are initialized automatically in `attendance.db`. Existing student accounts are preserved during initialization. Existing subject tables are migrated in place to add credits with a default value of 0; subject, timetable, attendance, and task records are retained.
 
 ### Run with Docker
 

@@ -32,6 +32,13 @@
                         <span class="input-group-text percentage-addon">%</span>
                     </div>
                 </div>
+                <div class="mb-4">
+                    <label class="form-label" for="credits">Credits</label>
+                    <input class="form-control" id="credits" name="credits" type="number"
+                           min="0" step="any"
+                           value="{{ form_data.credits if form_data else subject.credits }}" required>
+                    <div class="form-hint">Enter a positive credit value; decimals are supported.</div>
+                </div>
                 <button class="btn btn-primary w-100 btn-lg auth-submit" type="submit">Save changes <span aria-hidden="true">→</span></button>
             </form>
             <p class="auth-switch"><a href="{{ url_for('subjects.list_subjects') }}">← Back to subjects</a></p>

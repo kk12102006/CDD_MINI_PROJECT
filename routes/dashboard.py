@@ -36,7 +36,7 @@ def dashboard():
         recent_subjects = connection.execute(
             """
             SELECT subject_id, subject_name, total_scheduled_classes,
-                   minimum_percentage, created_at
+                   minimum_percentage, credits, created_at
             FROM subjects
             WHERE student_id = ?
             ORDER BY created_at DESC, subject_id DESC
