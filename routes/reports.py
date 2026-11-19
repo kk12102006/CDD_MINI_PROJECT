@@ -274,6 +274,7 @@ def download_subject_excel_report(subject_id):
         [subject],
         get_attendance_records(student_id, {"subject_id": subject_id}),
     )
+    
     return send_file(
         BytesIO(excel_data),
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
