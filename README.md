@@ -92,3 +92,4 @@ python -m unittest discover -s tests -p "test_notifications.py" -v
 ```
 
 Set a stable secret key in your environment before deployment. For example, generate one with `python -c "import secrets; print(secrets.token_hex(32))"` and set the `SECRET_KEY` environment variable. If not set, the app generates a key for the current process, so active sessions will be invalidated when the app restarts.
+# CDD_MINI_PROJECT
