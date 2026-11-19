@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Daily attendance{% endblock %}
+{% block content %}
+<section class="dashboard-section">
+    <div class="container">
+        <div class="page-heading">
+            <div>
+                <span class="eyebrow">YOUR DAILY RECORD</span>
+                <h1>Daily attendance</h1>
+                <p>Mark each scheduled period separately. P and A count as completed classes; NA does not.</p>
+            </div>
+            <a class="btn btn-outline-primary" href="{{ url_for('attendance.attendance_history') }}">View attendance history</a>
+        </div>
+
+        <div class="attendance-date-card">
+            <form method="get" action="{{ url_for('attendance.daily_attendance') }}" class="attendance-date-form">
+                <div>
+                    <label class="form-label" for="attendance-date">Select date</label>
+                    <input class="form-control" id="attendance-date" type="date" name="date"
+                           value="{{ selected_date }}" max="{{ today }}" required>
+                </div>
+                <div class="attendance-selected-day">
+                    <span class="field-label">DAY</span>
+                    <strong>{{ weekday }}</strong>
+                </div>
+                <button class="btn btn-primary align-self-end" type="submit">Show periods</button>
+            </form>
+            <p class="attendance-date-note">Today is {{ today_display }} ({{ today_weekday }}). Future dates cannot be selected.</p>
+        </div>
+
+        {% if periods %}
+            <form method="post" action="{{ url_for('attendance.save_daily_attendance') }}" class="mt-4">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="attendance_date" value="{{ selected_date }}">
+                <div class="attendance-period-list">
+                    {% for period in periods %}
+                        <article class="attendance-period-card">
+                            <div class="attendance-period-subject">
+                                <span class="recent-subject-mark">{{ period.subject_name[:1]|upper }}</span>
+                                <div>
+                                    <h2>{{ period.subject_name }}</h2>
+                                    {% if period.period_number %}
+                                        <span class="attendance-period-label">Period {{ period.period_number }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="attendance-period-time">
+                                <span class="field-label">CLASS TIME</span>
+                                <strong>{{ period.start_time }} – {{ period.end_time }}</strong>
+                            </div>
+                            <fieldset class="attendance-status-options">
+                                <legend class="field-label">ATTENDANCE</legend>
+                                {% for code, label in [("P", "Present"), ("A", "Absent"), ("NA", "No class")] %}
+                                    <input class="attendance-status-input" type="radio"
+                                           id="status-{{ period.timetable_id }}-{{ code|lower }}"
+                                           name="status_{{ period.timetable_id }}" value="{{ code }}"
+                                           {% if period.attendance_status == code %}checked{% endif %}
+                                           required>
+                                    <label class="attendance-status-option status-{{ code|lower }}"
+                                           for="status-{{ period.timetable_id }}-{{ code|lower }}">{{ label }}</label>
+                                {% endfor %}
+                            </fieldset>
+                        </article>
+                    {% endfor %}
+                </div>
+                <div class="attendance-save-row">
+                    <span>All scheduled periods need a status before saving.</span>
+                    <button class="btn btn-primary" type="submit">Save attendance</button>
+                </div>
+            </form>
+        {% else %}
+            <div class="empty-subjects mt-4">
+                <span class="empty-subject-icon">◷</span>
+                <h2>No classes scheduled for {{ weekday }}.</h2>
+                <p>Attendance periods are taken from the weekly timetable. Add or update your timetable to see classes here.</p>
+                <a class="btn btn-outline-primary" href="{{ url_for('timetable.timetable') }}">Open timetable</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

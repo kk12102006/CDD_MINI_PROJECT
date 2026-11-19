@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Attendance history{% endblock %}
+{% block content %}
+<section class="dashboard-section">
+    <div class="container">
+        <div class="page-heading">
+            <div>
+                <span class="eyebrow">PAST CLASS RECORDS</span>
+                <h1>Attendance history</h1>
+                <p>Review saved attendance by date and correct a status when needed.</p>
+            </div>
+            <a class="btn btn-primary" href="{{ url_for('attendance.daily_attendance') }}">Mark attendance</a>
+        </div>
+
+        <div class="attendance-date-card">
+            <form method="get" action="{{ url_for('attendance.attendance_history') }}" class="attendance-date-form">
+                <div>
+                    <label class="form-label" for="history-date">Filter by date</label>
+                    <input class="form-control" id="history-date" type="date" name="date"
+                           value="{{ selected_date }}" max="{{ today }}">
+                </div>
+                <button class="btn btn-primary align-self-end" type="submit">Filter history</button>
+                {% if date_filter_applied %}
+                    <a class="btn btn-outline-secondary align-self-end" href="{{ url_for('attendance.attendance_history') }}">Show all dates</a>
+                {% endif %}
+            </form>
+        </div>
+
+        {% if records %}
+            <div class="attendance-history-card mt-4">
+                <div class="table-responsive">
+                    <table class="table attendance-history-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Subject</th>
+                                <th>Period</th>
+                                <th>Status</th>
+                                <th><span class="visually-hidden">Actions</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in records %}
+                                <tr>
+                                    <td>{{ record.attendance_date }}</td>
+                                    <td>
+                                        <strong>{{ record.subject_name }}</strong>
+                                        {% if record.period_number %}
+                                            <small class="d-block text-muted">Period {{ record.period_number }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ record.start_time }} – {{ record.end_time }}</td>
+                                    <td>
+                                        {% if record.status == "P" %}
+                                            <span class="attendance-status-badge badge-present">Present</span>
+                                        {% elif record.status == "A" %}
+                                            <span class="attendance-status-badge badge-absent">Absent</span>
+                                        {% else %}
+                                            <span class="attendance-status-badge badge-no-class">No class</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <a class="btn btn-outline-primary btn-sm"
+                                           href="{{ url_for('attendance.edit_attendance', attendance_id=record.attendance_id) }}">Edit</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% elif date_filter_applied %}
+            <div class="empty-subjects mt-4">
+                <span class="empty-subject-icon">◷</span>
+                <h2>No attendance records found for this date.</h2>
+                <p>Select another date or view all dates to browse your saved attendance.</p>
+            </div>
+        {% else %}
+            <div class="empty-subjects mt-4">
+                <span class="empty-subject-icon">◷</span>
+                <h2>No attendance records found yet.</h2>
+                <p>Once you save attendance for scheduled periods, it will appear here.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

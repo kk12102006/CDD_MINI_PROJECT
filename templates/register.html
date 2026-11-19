@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Create your account{% endblock %}
+{% block content %}
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-card">
+            <div class="auth-intro">
+                <span class="eyebrow">YOUR NEXT STEP STARTS HERE</span>
+                <h1>Create your account</h1>
+                <p>Set up your student profile to get started.</p>
+            </div>
+            <form method="post" class="auth-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="mb-3">
+                    <label class="form-label" for="name">Student name</label>
+                    <input class="form-control" id="name" name="name" type="text" maxlength="100"
+                           value="{{ form_data.name if form_data else '' }}" autocomplete="name" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="usn">University seat number (USN)</label>
+                    <input class="form-control" id="usn" name="usn" type="text" maxlength="50"
+                           value="{{ form_data.usn if form_data else '' }}" autocomplete="username" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="email">Email address</label>
+                    <input class="form-control" id="email" name="email" type="email"
+                           value="{{ form_data.email if form_data else '' }}" autocomplete="email" required>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 mb-3">
+                        <label class="form-label" for="password">Password</label>
+                        <input class="form-control" id="password" name="password" type="password"
+                               minlength="8" autocomplete="new-password" required>
+                        <div class="form-hint">At least 8 characters</div>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label class="form-label" for="confirm_password">Confirm password</label>
+                        <input class="form-control" id="confirm_password" name="confirm_password" type="password"
+                               minlength="8" autocomplete="new-password" required>
+                    </div>
+                </div>
+                <button class="btn btn-primary w-100 btn-lg auth-submit" type="submit">Create account <span aria-hidden="true">→</span></button>
+            </form>
+            <p class="auth-switch">Already registered? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+        </div>
+    </div>
+</section>
+{% endblock %}

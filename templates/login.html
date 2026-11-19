@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+{% block content %}
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-card auth-card-compact">
+            <div class="auth-intro">
+                <span class="eyebrow">WELCOME BACK</span>
+                <h1>Log in to your account</h1>
+                <p>Enter your student details to continue.</p>
+            </div>
+            <form method="post" class="auth-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="mb-3">
+                    <label class="form-label" for="identifier">USN or email address</label>
+                    <input class="form-control" id="identifier" name="identifier" type="text"
+                           value="{{ identifier or '' }}" autocomplete="username" required autofocus>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label" for="password">Password</label>
+                    <input class="form-control" id="password" name="password" type="password"
+                           autocomplete="current-password" required>
+                </div>
+                <button class="btn btn-primary w-100 btn-lg auth-submit" type="submit">Log in <span aria-hidden="true">→</span></button>
+            </form>
+            <p class="auth-switch">New to Attendly? <a href="{{ url_for('auth.register') }}">Create an account</a></p>
+        </div>
+    </div>
+</section>
+{% endblock %}

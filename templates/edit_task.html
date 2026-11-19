@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Edit task{% endblock %}
+{% block content %}
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-card">
+            <div class="auth-intro">
+                <span class="eyebrow">TASK MANAGEMENT</span>
+                <h1>Edit task</h1>
+                <p>Update this task's details, subject, deadline or status.</p>
+            </div>
+            <form method="post" class="auth-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="mb-3">
+                    <label class="form-label" for="title">Task title</label>
+                    <input class="form-control" id="title" name="title" type="text" maxlength="200"
+                           value="{{ form_data.title if form_data else task.title }}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="description">Description</label>
+                    <textarea class="form-control task-description-input" id="description" name="description"
+                              rows="4">{{ form_data.description if form_data else task.description or '' }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="subject_id">Subject <span class="text-muted">(optional)</span></label>
+                    <select class="form-select" id="subject_id" name="subject_id">
+                        <option value="">General task</option>
+                        {% for subject in subjects %}
+                            <option value="{{ subject.subject_id }}"
+                                {% if form_data and form_data.subject_id == subject.subject_id|string %}
+                                    selected
+                                {% elif not form_data and task.subject_id == subject.subject_id %}
+                                    selected
+                                {% endif %}>
+                                {{ subject.subject_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 mb-3">
+                        <label class="form-label" for="deadline">Deadline</label>
+                        <input class="form-control" id="deadline" name="deadline" type="date"
+                               value="{{ form_data.deadline if form_data else task.deadline }}" required>
+                    </div>
+                    <div class="col-sm-6 mb-4">
+                        <label class="form-label" for="status">Status</label>
+                        <select class="form-select" id="status" name="status" required>
+                            {% set selected_status = form_data.status if form_data else task.status %}
+                            <option value="Pending" {% if selected_status == "Pending" %}selected{% endif %}>Pending</option>
+                            <option value="Completed" {% if selected_status == "Completed" %}selected{% endif %}>Completed</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary w-100 btn-lg auth-submit" type="submit">Save changes <span aria-hidden="true">→</span></button>
+            </form>
+            <p class="auth-switch"><a href="{{ url_for('tasks.list_tasks') }}">← Back to tasks</a></p>
+        </div>
+    </div>
+</section>
+{% endblock %}

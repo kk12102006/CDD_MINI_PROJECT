@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+{% block title %}Timetable{% endblock %}
+{% block content %}
+<section class="dashboard-section">
+    <div class="container">
+        <div class="page-heading">
+            <div>
+                <span class="eyebrow">WEEKLY FLOW</span>
+                <h1>Timetable</h1>
+                <p>Upload a PDF or add your classes manually to build your weekly schedule.</p>
+            </div>
+            {% if not show_preview and entries %}
+                <form action="{{ url_for('timetable.replace_timetable') }}" method="post" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-outline-danger btn-sm" type="submit">Replace timetable</button>
+                </form>
+            {% endif %}
+        </div>
+
+        {% if show_preview %}
+            <div class="timetable-card">
+                <div class="timetable-card-header">
+                    <div>
+                        <span class="eyebrow">PDF REVIEW</span>
+                        <h2>Verify extracted timetable entries</h2>
+                    </div>
+                </div>
+                <form method="post" action="{{ url_for('timetable.confirm_timetable_preview') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="table-responsive">
+                        <table class="table timetable-preview-table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Day</th>
+                                    <th>Subject</th>
+                                    <th>Start</th>
+                                    <th>End</th>
+                                    <th>Period</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in preview_entries %}
+                                    <tr>
+                                        <td>
+                                            <select class="form-select" name="preview_day_{{ loop.index0 }}">
+                                                {% for day in days %}
+                                                    <option value="{{ day }}" {% if day == entry.day_of_week %}selected{% endif %}>{{ day }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-select" name="preview_subject_{{ loop.index0 }}">
+                                                <option value="">Unmatched</option>
+                                                {% for subject in subjects %}
+                                                    <option value="{{ subject.subject_id }}" {% if entry.subject_id == subject.subject_id %}selected{% endif %}>
+                                                        {{ subject.subject_name }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </td>
+                                        <td><input class="form-control" type="time" name="preview_start_{{ loop.index0 }}" value="{{ entry.start_time }}"></td>
+                                        <td><input class="form-control" type="time" name="preview_end_{{ loop.index0 }}" value="{{ entry.end_time }}"></td>
+                                        <td><input class="form-control" type="number" min="1" step="1" name="preview_period_{{ loop.index0 }}" value="{{ entry.period_number or '' }}" placeholder="Optional"></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <a class="btn btn-outline-secondary" href="{{ url_for('timetable.timetable') }}">Cancel</a>
+                        <button class="btn btn-primary" type="submit">Confirm and Save</button>
+                    </div>
+                </form>
+            </div>
+        {% else %}
+            <div class="timetable-action-grid">
+                <div class="timetable-card">
+                    <div class="timetable-card-header">
+                        <div>
+                            <span class="eyebrow">UPLOAD</span>
+                            <h2>Weekly timetable PDF</h2>
+                        </div>
+                    </div>
+                    <p class="timetable-help">Upload a text-based weekly timetable PDF. The system will detect days, timings and matching subjects for review.</p>
+                    <form action="{{ url_for('timetable.upload_timetable') }}" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="mb-3">
+                            <input class="form-control" type="file" name="pdf_file" accept=".pdf,application/pdf" required>
+                        </div>
+                        <button class="btn btn-primary" type="submit">Upload PDF</button>
+                    </form>
+                </div>
+
+                <div class="timetable-card">
+                    <div class="timetable-card-header">
+                        <div>
+                            <span class="eyebrow">MANUAL ENTRY</span>
+                            <h2>Add class slot</h2>
+                        </div>
+                    </div>
+                    <form action="{{ url_for('timetable.add_manual_timetable') }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="day_of_week">Day</label>
+                                <select class="form-select" id="day_of_week" name="day_of_week" required>
+                                    {% for day in days %}
+                                        <option value="{{ day }}">{{ day }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="subject_id">Subject</label>
+                                <select class="form-select" id="subject_id" name="subject_id" required>
+                                    {% if subjects %}
+                                        {% for subject in subjects %}
+                                            <option value="{{ subject.subject_id }}">{{ subject.subject_name }}</option>
+                                        {% endfor %}
+                                    {% else %}
+                                        <option value="">Add a subject first</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="start_time">Start time</label>
+                                <input class="form-control" id="start_time" type="time" name="start_time" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="end_time">End time</label>
+                                <input class="form-control" id="end_time" type="time" name="end_time" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="period_number">Period number</label>
+                                <input class="form-control" id="period_number" type="number" min="1" step="1" name="period_number" placeholder="Optional">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary mt-3" type="submit" {% if not subjects %}disabled{% endif %}>Add entry</button>
+                    </form>
+                </div>
+            </div>
+
+            {% if edit_entry %}
+                <div class="timetable-card mt-4">
+                    <div class="timetable-card-header">
+                        <div>
+                            <span class="eyebrow">EDIT ENTRY</span>
+                            <h2>Update class slot</h2>
+                        </div>
+                    </div>
+                    <form method="post" action="{{ url_for('timetable.edit_timetable_entry', timetable_id=edit_entry.timetable_id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="edit_day">Day</label>
+                                <select class="form-select" id="edit_day" name="day_of_week" required>
+                                    {% for day in days %}
+                                        <option value="{{ day }}" {% if day == edit_entry.day_of_week %}selected{% endif %}>{{ day }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="edit_subject">Subject</label>
+                                <select class="form-select" id="edit_subject" name="subject_id" required>
+                                    {% for subject in subjects %}
+                                        <option value="{{ subject.subject_id }}" {% if subject.subject_id == edit_entry.subject_id %}selected{% endif %}>{{ subject.subject_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="edit_start">Start time</label>
+                                <input class="form-control" id="edit_start" type="time" name="start_time" value="{{ edit_entry.start_time }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="edit_end">End time</label>
+                                <input class="form-control" id="edit_end" type="time" name="end_time" value="{{ edit_entry.end_time }}" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="edit_period">Period number</label>
+                                <input class="form-control" id="edit_period" type="number" min="1" step="1" name="period_number" value="{{ edit_entry.period_number or '' }}" placeholder="Optional">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-3">
+                            <a class="btn btn-outline-secondary" href="{{ url_for('timetable.timetable') }}">Cancel</a>
+                            <button class="btn btn-primary" type="submit">Update entry</button>
+                        </div>
+                    </form>
+                </div>
+            {% endif %}
+
+            {% if entries %}
+                <div class="timetable-card mt-4">
+                    <div class="timetable-card-header">
+                        <div>
+                            <span class="eyebrow">WEEKLY GRID</span>
+                            <h2>Saved timetable</h2>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table timetable-grid-table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    {% for day in days %}
+                                        <th>{{ day }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for slot in time_slots %}
+                                    <tr>
+                                        <th>{{ slot }}</th>
+                                        {% for day in days %}
+                                            {% set cell = grid.get(day, {}).get(slot) %}
+                                            <td>
+                                                {% if cell %}
+                                                    <div class="timetable-cell">
+                                                        <strong>{{ cell.subject_name }}</strong>
+                                                        <small>{{ cell.start_time }} - {{ cell.end_time }}</small>
+                                                    </div>
+                                                {% else %}
+                                                    <span class="text-muted small">—</span>
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="timetable-card mt-4">
+                    <div class="timetable-card-header">
+                        <div>
+                            <span class="eyebrow">MANAGE</span>
+                            <h2>Saved entries</h2>
+                        </div>
+                    </div>
+                    <div class="timetable-entry-list">
+                        {% for entry in entries %}
+                            <div class="timetable-entry-item">
+                                <div>
+                                    <strong>{{ entry.subject_name }}</strong>
+                                    <p>{{ entry.day_of_week }} • {{ entry.start_time }} - {{ entry.end_time }}</p>
+                                </div>
+                                <div class="timetable-entry-actions">
+                                    <a class="btn btn-sm btn-outline-primary" href="{{ url_for('timetable.edit_timetable_entry', timetable_id=entry.timetable_id) }}">Edit</a>
+                                    <form action="{{ url_for('timetable.delete_timetable_entry', timetable_id=entry.timetable_id) }}" method="post">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="empty-subjects mt-4">
+                    <span class="empty-subject-icon">▦</span>
+                    <h2>No timetable entries yet.</h2>
+                    <p>Upload a fresh PDF or add your first class slot manually to start your weekly schedule.</p>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

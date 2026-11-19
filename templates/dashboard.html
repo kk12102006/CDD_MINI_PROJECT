@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}Your dashboard{% endblock %}
+{% block content %}
+<section class="dashboard-section">
+    <div class="container">
+        <div class="dashboard-welcome">
+            <div>
+                <span class="eyebrow">STUDENT SPACE</span>
+                <h1>Welcome, {{ student.name }}.</h1>
+                <p>Your academic home base is ready.</p>
+            </div>
+            <div class="welcome-mark" aria-hidden="true">✦</div>
+        </div>
+        <div class="dashboard-layout">
+            <aside class="dashboard-sidebar">
+                <span class="sidebar-label">YOUR WORKSPACE</span>
+                <a class="sidebar-link active" href="{{ url_for('dashboard.dashboard') }}"><span>▦</span> Dashboard</a>
+                <a class="sidebar-link" href="{{ url_for('subjects.list_subjects') }}"><span>▤</span> Subjects</a>
+                <a class="sidebar-link" href="{{ url_for('tasks.list_tasks') }}"><span>✓</span> Tasks</a>
+                <a class="sidebar-link" href="{{ url_for('timetable.timetable') }}"><span>▦</span> Timetable</a>
+                <a class="sidebar-link" href="{{ url_for('attendance.daily_attendance') }}"><span>◷</span> Attendance</a>
+                <a class="sidebar-link" href="{{ url_for('attendance.attendance_overview') }}"><span>◔</span> Attendance overview</a>
+                <a class="sidebar-link" href="{{ url_for('reports.reports_index') }}"><span>▧</span> Reports</a>
+            </aside>
+            <div class="dashboard-main">
+                <section class="dashboard-profile-panel" aria-labelledby="student-profile-heading">
+                    <div class="profile-heading">
+                        <div><span class="eyebrow">YOUR PROFILE</span><h2 id="student-profile-heading">Student information</h2></div>
+                        <span class="profile-badge"><span></span> Account active</span>
+                    </div>
+                    <div class="profile-grid">
+                        <article class="profile-field"><span class="field-icon">✦</span><div><span class="field-label">STUDENT NAME</span><strong>{{ student.name }}</strong></div></article>
+                        <article class="profile-field"><span class="field-icon field-icon-violet">#</span><div><span class="field-label">UNIVERSITY SEAT NUMBER</span><strong>{{ student.usn }}</strong></div></article>
+                        <article class="profile-field"><span class="field-icon field-icon-green">@</span><div><span class="field-label">EMAIL ADDRESS</span><strong class="email-value">{{ student.email }}</strong></div></article>
+                    </div>
+                </section>
+                <section class="dashboard-attendance-panel" aria-labelledby="attendance-summary-heading">
+                    <div class="dashboard-section-heading">
+                        <div><span class="eyebrow">ATTENDANCE</span><h2 id="attendance-summary-heading">Your attendance snapshot</h2></div>
+                        <a class="dashboard-section-link" href="{{ url_for('attendance.attendance_overview') }}">View overview <span aria-hidden="true">→</span></a>
+                    </div>
+                    <div class="dashboard-metrics" aria-label="Attendance summary">
+                        <article class="dashboard-metric">
+                            <span class="field-label">OVERALL ATTENDANCE</span>
+                            <strong>{{ attendance_summary.attendance_percentage_display }}</strong>
+                            <small>{{ attendance_summary.completed_classes }} completed classes</small>
+                        </article>
+                        <article class="dashboard-metric metric-positive">
+                            <span class="field-label">SUBJECTS SATISFACTORY</span>
+                            <strong>{{ attendance_summary.satisfactory_subjects }}</strong>
+                            <small>Meeting the minimum attendance</small>
+                        </article>
+                        <article class="dashboard-metric metric-warning">
+                            <span class="field-label">BELOW REQUIREMENT</span>
+                            <strong>{{ attendance_summary.below_required_subjects }}</strong>
+                            <small>{{ attendance_summary.absence_deadline_subjects }} absence deadline{{ '' if attendance_summary.absence_deadline_subjects == 1 else 's' }}</small>
+                        </article>
+                    </div>
+                </section>
+                <section class="task-summary" aria-labelledby="remaining-tasks-heading">
+                    <div class="task-summary-heading">
+                        <div>
+                            <span class="eyebrow">TASKS &amp; DEADLINES</span>
+                            <h2 id="remaining-tasks-heading">What's coming up</h2>
+                        </div>
+                        <a class="btn btn-primary btn-sm" href="{{ url_for('tasks.list_tasks') }}">View All Tasks</a>
+                    </div>
+                    {% if remaining_tasks %}
+                        <div class="task-card-list">
+                            {% for task in remaining_tasks %}
+                                <article class="task-card {% if task.days_remaining < 0 %}task-card-overdue{% elif task.days_remaining == 0 %}task-card-due{% endif %}">
+                                    <div class="task-card-content">
+                                        <div class="task-card-title-row">
+                                            <h3>{{ task.title }}</h3>
+                                            {% if task.days_remaining < 0 %}
+                                                <span class="badge text-bg-danger">OVERDUE</span>
+                                            {% elif task.days_remaining == 0 %}
+                                                <span class="badge text-bg-warning">DUE TODAY</span>
+                                            {% else %}
+                                                <span class="badge text-bg-primary">PENDING</span>
+                                            {% endif %}
+                                        </div>
+                                        {% if task.subject_name %}
+                                            <p class="task-subject">{{ task.subject_name }}</p>
+                                        {% endif %}
+                                        {% if task.description %}
+                                            <p class="task-description">{{ task.description }}</p>
+                                        {% endif %}
+                                        <div class="task-deadline">
+                                            <span>Deadline: {{ task.deadline }}</span>
+                                            {% if task.days_remaining < 0 %}
+                                                <strong class="text-danger">OVERDUE – {{ -task.days_remaining }} DAY{{ '' if task.days_remaining == -1 else 'S' }}</strong>
+                                            {% elif task.days_remaining == 0 %}
+                                                <strong class="text-warning-emphasis">DUE TODAY</strong>
+                                            {% else %}
+                                                <strong>{{ task.days_remaining }} day{{ '' if task.days_remaining == 1 else 's' }} remaining</strong>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <form method="post" action="{{ url_for('tasks.complete_task', task_id=task.task_id) }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button class="btn btn-outline-success btn-sm" type="submit">Complete</button>
+                                    </form>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="task-empty-message">No pending tasks at the moment. You are all caught up!</p>
+                    {% endif %}
+                </section>
+                <section class="notification-preferences" aria-labelledby="notification-preferences-heading">
+                    <div class="task-summary-heading">
+                        <div>
+                            <span class="eyebrow">EMAIL REMINDERS</span>
+                            <h2 id="notification-preferences-heading">Notification Preferences</h2>
+                            <p>Notifications are sent to {{ student.email }} using Asia/Kolkata time.</p>
+                        </div>
+                    </div>
+                    <form method="post" action="{{ url_for('notification_settings.save_notification_preferences') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="row g-3">
+                            <div class="col-lg-6">
+                                <div class="notification-setting">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" id="attendance-enabled"
+                                               name="attendance_enabled" type="checkbox" value="1"
+                                               {% if notification_preferences.attendance_enabled %}checked{% endif %}>
+                                        <label class="form-check-label" for="attendance-enabled">Attendance Notifications</label>
+                                    </div>
+                                    <label class="form-label mt-3" for="attendance-time">Preferred attendance notification time</label>
+                                    <input class="form-control" id="attendance-time" name="attendance_time"
+                                           type="time" value="{{ notification_preferences.attendance_time }}" required>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="notification-setting">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" id="task-enabled"
+                                               name="task_enabled" type="checkbox" value="1"
+                                               {% if notification_preferences.task_enabled %}checked{% endif %}>
+                                        <label class="form-check-label" for="task-enabled">Task Notifications</label>
+                                    </div>
+                                    <label class="form-label mt-3" for="task-time">Preferred task notification time</label>
+                                    <input class="form-control" id="task-time" name="task_time"
+                                           type="time" value="{{ notification_preferences.task_time }}" required>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary mt-3" type="submit">Save Settings</button>
+                    </form>
+                </section>
+                <div class="dashboard-report-link">
+                    <span>Review detailed monthly, subject and date-wise reports.</span>
+                    <a class="btn btn-primary btn-sm" href="{{ url_for('reports.reports_index') }}">Open reports</a>
+                </div>
+                <section class="subject-summary">
+                    <div class="subject-summary-heading">
+                        <div>
+                            <span class="eyebrow">SUBJECTS</span>
+                            <h2>Your subjects <span class="subject-count">{{ subject_count }}</span></h2>
+                        </div>
+                        <a class="btn btn-primary btn-sm" href="{{ url_for('subjects.list_subjects') }}">Manage subjects</a>
+                    </div>
+                    {% if recent_subjects %}
+                        <div class="recent-subject-list">
+                            {% for subject in recent_subjects %}
+                                <div class="recent-subject">
+                                    <span class="recent-subject-mark">{{ subject.subject_name[:1]|upper }}</span>
+                                    <span class="recent-subject-name">{{ subject.subject_name }}</span>
+                                    <span class="recent-subject-classes">{{ subject.total_scheduled_classes }} scheduled classes · {{ subject.credits }} credits</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="empty-summary">No subjects added yet. Add your first subject to get started.</p>
+                    {% endif %}
+                </section>
+                <div class="dashboard-next">
+                    <div><span class="next-icon">✦</span><div><strong>Your workspace is ready</strong><p>Manage your subjects, timetable, attendance and reports from one place.</p></div></div>
+                </div>
+                <form action="{{ url_for('auth.logout') }}" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-outline-primary logout-button" type="submit">Log out of your account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
